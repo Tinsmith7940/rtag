@@ -53,8 +53,38 @@ pub fn get_extension(path: &str) -> FileExtension {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum FileExtension {
     Mp3,
     M4a,
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{get_extension, FileExtension};
+
+
+    #[test]
+    fn match_file_extension() {
+        let mp3 = "mp3";
+        let m4a = "m4a";
+        
+        assert_eq!(get_extension(mp3), FileExtension::Mp3);
+        assert_eq!(get_extension(m4a), FileExtension::M4a);
+    }
+
+    #[test]
+    fn match_file_extension_case_insensitive() {
+        let mp3 = "MP3";
+        let m4a = "m4A";
+        assert_eq!(get_extension(mp3), FileExtension::Mp3);
+        assert_eq!(get_extension(m4a), FileExtension::M4a);
+    }
+
+    #[test]
+    #[should_panic(expected = "No valid file extension found! Cannot determine file type")]
+    fn no_match_panics() {
+        let mp3 = "foo";
+        get_extension(mp3);
+    }
 }
