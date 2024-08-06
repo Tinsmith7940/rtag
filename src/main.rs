@@ -1,7 +1,7 @@
 use clap::Parser;
 use id3::*;
 use simple_logger::SimpleLogger;
-
+use core::fmt::Debug;
 fn main() {
     SimpleLogger::new()
         .with_level(log::LevelFilter::Info)
@@ -10,11 +10,14 @@ fn main() {
 
     let args = Args::parse();
 
-    let (audiotag, extension) = get_audiotag(args.file.clone());
+    let audiotagbox = get_audiotag(args.file.clone());
 
+    let audiotag = audiotagbox.clone();
+
+    let clone_at = audiotag.get_audiofile().unwrap();
     log::info!("Audiotag loaded: {:?}",audiotag);
-    println!("Artist: {:?}",audiotag.get_audiofile().unwrap().artist());
-    println!("Artist: {:?}",audiotag.get_audiofile().unwrap().year());
+    println!("Artist: {:?}",clone_at.artist());
+    println!("Artist: {:?}",clone_at.year());
 }
 
 /// A simple program to read and write audio file tags
@@ -40,7 +43,7 @@ pub enum FileExtension {
     Mp3,
     M4a
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum AudioFile {
     Mp3(Mp3Tag),
     M4a(M4aTag)
@@ -48,10 +51,10 @@ pub enum AudioFile {
 
 impl AudioFile {
 
-    fn get_audiofile(&self) -> Option<&dyn TagUtils> {
+    fn get_audiofile(&self) -> Option<Box<&dyn TagUtils>> {
        match self {
-            Self::Mp3(s) => Some(s),
-            Self::M4a(s) => Some(s),
+            Self::Mp3(s) => Some(Box::new(s)),
+            Self::M4a(s) => Some(Box::new(s)),
         }
     }
     fn get_mp3(self) -> Option<Mp3Tag> {
@@ -67,19 +70,20 @@ impl AudioFile {
         }
     }
 }
-pub fn get_audiotag(path: String) -> (AudioFile, FileExtension) {
+pub fn get_audiotag(path: String) -> AudioFile {
     let audio_type = get_extension(path.as_str());
      match audio_type {
         FileExtension::Mp3 => {
             log::info!("parsing mp3 file");
-            (AudioFile::Mp3(Mp3Tag::create_tag_from_path(path)), audio_type)
+            AudioFile::Mp3(Mp3Tag::create_tag_from_path(path))
         }
         FileExtension::M4a => {
             log::info!("parsing m4a file");
-            (AudioFile::M4a(M4aTag::create_tag_from_path(path)), audio_type)
+            AudioFile::M4a(M4aTag::create_tag_from_path(path))
        }
     }
 }
+
 pub trait TagUtils {
 
     fn artist(&self) -> Option<String>;
@@ -87,11 +91,17 @@ pub trait TagUtils {
     fn year(&self) -> Option<String>;
 }
 
+impl Debug for dyn TagUtils {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("TagUtils").finish()
+    }
+}
+
 pub trait Tag {
     fn create_tag_from_path(file: String) -> Self;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct M4aTag {
     tag: mp4ameta::Tag
 }
@@ -109,6 +119,7 @@ impl Tag for M4aTag {
         }
     }
 }
+
 impl TagUtils for M4aTag {
     fn artist(&self) -> Option<String> {
         match self.tag.artist() {
@@ -124,7 +135,7 @@ impl TagUtils for M4aTag {
         }
     }
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Mp3Tag {
     tag: id3::Tag
 }
