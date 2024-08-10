@@ -13,11 +13,7 @@ fn main() -> Result<()> {
 
     let args = Args::parse();
 
-    let mut audiotagbox = get_audiofile(args.file().clone())
-        .get_tag()
-        .unwrap_or_else(|| {
-            panic!("Unable to parse tags from audiofile");
-        });
+    let mut audiotagbox = get_audiofile(args.file().clone());
 
     if let Some(title) = args.title() {
         audiotagbox.set_title(title.to_string());
