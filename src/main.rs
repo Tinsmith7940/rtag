@@ -3,8 +3,9 @@ pub mod tags;
 use tags::get_audiofile;
 use simple_logger::SimpleLogger;
 use cli::{ Args, Parser };
+use anyhow::Result;
 
-fn main() {
+fn main() -> Result<()> {
     SimpleLogger::new()
         .with_level(log::LevelFilter::Info)
         .init()
@@ -12,13 +13,25 @@ fn main() {
 
     let args = Args::parse();
 
-    let audiotagbox = get_audiofile(args.file().clone())
+    let mut audiotagbox = get_audiofile(args.file().clone())
         .get_tag()
         .unwrap_or_else(|| {
             panic!("Unable to parse tags from audiofile");
         });
 
-    println!("Artist: {:?}", audiotagbox.artist());
-    println!("Year: {:?}", audiotagbox.year());
-    println!("Title: {:?}", audiotagbox.title());
+    if let Some(title) = args.title() {
+        audiotagbox.set_title(title.to_string());
+    }
+
+    if let Some(year) = args.year() {
+        audiotagbox.set_year(*year);
+    }
+
+    if let Some(artist) = args.artist() {
+        audiotagbox.set_artist(artist.to_string());
+    }
+
+    audiotagbox.write_to_file()?;
+
+    Ok(())
 }

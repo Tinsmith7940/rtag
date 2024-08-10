@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 use id3::*;
-use mp4ameta::Error as M4aError;
+use anyhow::Result;
 
 fn get_extension(path: &str) -> FileExtension {
     let file = path.to_string();
@@ -69,6 +69,7 @@ pub trait TagUtils {
     fn title(&self) -> Option<String>;
 
     fn set_title(&mut self, title: String);
+    fn write_to_file(&self) -> Result<()>;
 
 }
 
@@ -86,13 +87,16 @@ pub trait Tag {
 /// Struct encapsulating m4ameta::Tag interface
 #[derive(Debug, Clone)]
 pub struct M4aTag {
+    /// mp4a Tag struct
     tag: mp4ameta::Tag,
+    /// file path
+    path: String,
 }
 
 impl Tag for M4aTag {
     fn create_tag_from_path(file: String) -> Self {
-        match mp4ameta::Tag::read_from_path(file) {
-            Ok(tag) => M4aTag { tag },
+        match mp4ameta::Tag::read_from_path(file.clone()) {
+            Ok(tag) => M4aTag { tag, path: file },
             Err(e) => {
                 panic!("Unable to parse provided file path. Error: {e}")
             }
@@ -124,18 +128,26 @@ impl TagUtils for M4aTag {
     fn set_title(&mut self, title: String) {
         let _ = &self.tag.set_title(title);
     }
+
+    fn write_to_file(&self) -> Result<()> {
+        let _ = &self.tag.write_to_path(&self.path)?;
+        Ok(())
+    }
 }
 
 /// Struct encapsulating id3::Tag interface
 #[derive(Debug, Clone)]
 pub struct Id3Tag {
+    /// Tag struct for interacting with id3 tags
     tag: id3::Tag,
+    /// file path
+    path: String,
 }
 
 impl Tag for Id3Tag {
     fn create_tag_from_path(file: String) -> Self {
-        match id3::Tag::read_from_path(file) {
-            Ok(tag) => Id3Tag { tag },
+        match id3::Tag::read_from_path(file.clone()) {
+            Ok(tag) => Id3Tag { tag, path: file},
             Err(e) => {
                 panic!("Unable to parse provided file path. Error: {e}")
             }
@@ -165,6 +177,11 @@ impl TagUtils for Id3Tag {
 
     fn set_title(&mut self, title: String) {
         let _ = &self.tag.set_title(title);
+    }
+
+    fn write_to_file(&self) -> Result<()> {
+        let _ = &self.tag.write_to_path(&self.path, Version::Id3v24)?;
+        Ok(())
     }
 }
 
