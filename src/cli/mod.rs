@@ -18,7 +18,12 @@ pub struct Args {
 
     /// Title
     #[arg(short, long)]
-    title: Option<String>
+    title: Option<String>,
+
+    /// Name of config profile to use for default values
+    /// This is defined the utilities config.toml
+    #[arg(long)]
+    profile: Option<String>,
 }
 
 impl Args {
@@ -36,5 +41,9 @@ impl Args {
 
     pub fn title(&self) -> &Option<String> {
         &self.title
+    }
+
+    pub fn profile(&self) -> &Option<String> {
+        &self.profile
     }
 }
