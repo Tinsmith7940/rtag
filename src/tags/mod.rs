@@ -1,6 +1,6 @@
+use anyhow::Result;
 use core::fmt::Debug;
 use id3::*;
-use anyhow::Result;
 
 fn get_extension(path: &str) -> FileExtension {
     let file = path.to_string();
@@ -44,13 +44,12 @@ pub trait TagUtils {
 
     fn year(&self) -> Option<String>;
 
-    fn set_year(&mut self, year: i32);
+    fn set_year(&mut self, year: String);
 
     fn title(&self) -> Option<String>;
 
     fn set_title(&mut self, title: String);
     fn write_to_file(&self) -> Result<()>;
-
 }
 
 impl Debug for dyn TagUtils {
@@ -97,8 +96,8 @@ impl TagUtils for M4aTag {
         self.tag.year().map(|year| year.to_string())
     }
 
-    fn set_year(&mut self, year: i32) {
-        let _ = &self.tag.set_year(year.to_string());
+    fn set_year(&mut self, year: String) {
+        let _ = &self.tag.set_year(year);
     }
 
     fn title(&self) -> Option<String> {
@@ -127,7 +126,7 @@ pub struct Id3Tag {
 impl Tag for Id3Tag {
     fn create_tag_from_path(file: String) -> Self {
         match id3::Tag::read_from_path(file.clone()) {
-            Ok(tag) => Id3Tag { tag, path: file},
+            Ok(tag) => Id3Tag { tag, path: file },
             Err(e) => {
                 panic!("Unable to parse provided file path. Error: {e}")
             }
@@ -147,8 +146,8 @@ impl TagUtils for Id3Tag {
         self.tag.year().map(|year| year.to_string())
     }
 
-    fn set_year(&mut self, year: i32) {
-        let _ = &self.tag.set_year(year);
+    fn set_year(&mut self, year: String) {
+        let _ = &self.tag.set_year(year.parse::<i32>().unwrap());
     }
 
     fn title(&self) -> Option<String> {
