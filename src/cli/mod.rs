@@ -26,15 +26,15 @@ impl Args {
         &self.file
     }
 
-    pub fn artist(&self) -> String {
-        self.artist.clone().unwrap_or("None".to_string())
+    pub fn artist(&self) -> &Option<String> {
+        &self.artist
     }
 
-    pub fn year(&self) -> i32 {
-        self.year.unwrap_or(0)
+    pub fn year(&self) -> &Option<i32> {
+        &self.year
     }
 
-    pub fn title(&self) -> String {
-        self.title.clone().unwrap_or("None".to_string())
+    pub fn title(&self) -> &Option<String> {
+        &self.title
     }
 }
