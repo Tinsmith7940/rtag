@@ -8,7 +8,7 @@ pub struct Args {
     #[arg(short, long)]
     file: String,
 
-    /// artist
+    /// Artist
     #[arg(short, long)]
     artist: Option<String>,
 
@@ -21,7 +21,7 @@ pub struct Args {
     title: Option<String>,
 
     /// Name of config profile to use for default values
-    /// This is defined the utilities config.toml
+    /// This is defined in the utilities config.toml
     #[arg(long)]
     profile: Option<String>,
 }
