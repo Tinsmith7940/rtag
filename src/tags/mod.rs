@@ -20,38 +20,18 @@ pub enum FileExtension {
     M4a,
 }
 
-/// Enum of valid audio file tag types:
-/// - Id3: mp3, etc...
-/// - M4a
-#[derive(Debug, Clone)]
-pub enum AudioFile {
-    Id3(Id3Tag),
-    M4a(M4aTag),
-}
-
-impl AudioFile {
-
-    /// Get the associated Tag struct to read/write metadata
-    pub fn get_tag(&self) -> Option<Box<dyn TagUtils>> {
-        match self {
-            Self::Id3(s) => Some(Box::new(s.clone())),
-            Self::M4a(s) => Some(Box::new(s.clone())),
-        }
-    }
-}
-
 /// Parse the target file and build the correct
 /// AudioFile enum value based on filetype
-pub fn get_audiofile(path: String) -> AudioFile {
+pub fn get_audiofile(path: String) -> Box<dyn TagUtils> {
     let audio_type = get_extension(path.as_str());
     match audio_type {
         FileExtension::Mp3 => {
             log::info!("parsing mp3 file");
-            AudioFile::Id3(Id3Tag::create_tag_from_path(path))
+            Box::new(Id3Tag::create_tag_from_path(path))
         }
         FileExtension::M4a => {
             log::info!("parsing m4a file");
-            AudioFile::M4a(M4aTag::create_tag_from_path(path))
+            Box::new(M4aTag::create_tag_from_path(path))
         }
     }
 }
