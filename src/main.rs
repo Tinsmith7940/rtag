@@ -24,6 +24,7 @@ fn main() -> Result<()> {
 }
 
 fn execute(cfg: Option<Config>, args: &Args) -> Result<()> {
+    let mut preproc_cmd_list: Vec<PreProcessCommands> = vec![];
     let mut cmd_list: HashMap<WriteCommands, String> = HashMap::new();
 
     if let Some(profile) = args.profile() {
@@ -31,14 +32,23 @@ fn execute(cfg: Option<Config>, args: &Args) -> Result<()> {
         match cfg_unwrap.profile.get(profile) {
             Some(profile) => {
                 for (k, v) in profile.as_table().unwrap().into_iter() {
-                    let key = WriteCommands::get_write_command(k.to_string().as_str());
-                    cmd_list.insert(key, v.to_string());
+                    if let Some(key) = WriteCommands::get_write_command(k.to_string().as_str()) {
+                        cmd_list.insert(key, v.to_string());
+                    } else if let Some(pre_key) = PreProcessCommands::get_preprocess_command(k.to_string().as_str()) {
+                        preproc_cmd_list.push(pre_key);
+                    } else {
+                        log::warn!("Command {k} from profile {profile} is not a valid command. Skipping...");
+                    }
                 }
             }
             None => {
                 log::warn!("No profile matching {profile} found");
             }
         }
+    }
+
+    if *args.clear() && !preproc_cmd_list.contains(&PreProcessCommands::Clear)  {
+            preproc_cmd_list.push(PreProcessCommands::Clear);
     }
 
     if let Some(title) = args.title() {
@@ -53,13 +63,29 @@ fn execute(cfg: Option<Config>, args: &Args) -> Result<()> {
         cmd_list.insert(WriteCommands::Artist, artist.to_string());
     }
 
-    let audiotagbox = get_audiofile(args.file().clone());
+    let init_audiotagbox = get_audiofile(args.file().clone());
 
-    execute_cmds(cmd_list, audiotagbox)?.write_to_file()?;
+    execute_write_cmds(
+        cmd_list,
+        execute_preproc_cmds(preproc_cmd_list, init_audiotagbox)?
+    )?
+    .write_to_file()?;
     Ok(())
 }
 
-fn execute_cmds(
+fn execute_preproc_cmds(
+    cmds: Vec<PreProcessCommands>,
+    mut audiotagbox: Box<dyn TagUtils>,
+) -> Result<Box<dyn TagUtils>> {
+    for k in cmds {
+        match k {
+            PreProcessCommands::Clear => audiotagbox.clear()?,
+        }
+    }
+    Ok(audiotagbox)
+}
+
+fn execute_write_cmds(
     cmds: HashMap<WriteCommands, String>,
     mut audiotagbox: Box<dyn TagUtils>,
 ) -> Result<Box<dyn TagUtils>> {
@@ -88,6 +114,22 @@ fn get_config() -> Option<Config> {
     None
 }
 
+/// Commands that should always be executed before WriteCommands
+#[derive(Eq, Hash, PartialEq)]
+enum PreProcessCommands {
+    /// Clear all metadata from existing tag
+    Clear,
+}
+
+impl PreProcessCommands {
+    fn get_preprocess_command(cmd: &str) -> Option<Self> {
+        match cmd.to_lowercase().as_str() {
+            "clear" => Some(Self::Clear),
+            _default => None,
+        }
+    }
+}
+
 #[derive(Eq, Hash, PartialEq)]
 enum WriteCommands {
     Artist,
@@ -96,12 +138,12 @@ enum WriteCommands {
 }
 
 impl WriteCommands {
-    fn get_write_command(cmd: &str) -> Self {
+    fn get_write_command(cmd: &str) -> Option<Self> {
         match cmd.to_lowercase().as_str() {
-            "artist" => Self::Artist,
-            "title" => Self::Title,
-            "year" => Self::Year,
-            _default => panic!("{cmd} is not a recognized command"),
+            "artist" => Some(Self::Artist),
+            "title" => Some(Self::Title),
+            "year" => Some(Self::Year),
+            _default => None,
         }
     }
 }

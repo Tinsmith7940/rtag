@@ -50,6 +50,7 @@ pub trait TagUtils {
 
     fn set_title(&mut self, title: String);
     fn write_to_file(&self) -> Result<()>;
+    fn clear(&mut self) -> Result<()>;
 }
 
 impl Debug for dyn TagUtils {
@@ -112,6 +113,11 @@ impl TagUtils for M4aTag {
         let _ = &self.tag.write_to_path(&self.path)?;
         Ok(())
     }
+
+    fn clear(&mut self) -> Result<()> {
+        let _ = self.tag.clear();
+        Ok(())
+    }
 }
 
 /// Struct encapsulating id3::Tag interface
@@ -161,6 +167,10 @@ impl TagUtils for Id3Tag {
     fn write_to_file(&self) -> Result<()> {
         let _ = &self.tag.write_to_path(&self.path, Version::Id3v24)?;
         Ok(())
+    }
+
+    fn clear(&mut self) -> Result<()> {
+        panic!("--clear is not implemented for id3 tag types (mp3, wav, etc...)");
     }
 }
 
