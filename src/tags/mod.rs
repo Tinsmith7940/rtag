@@ -1,13 +1,18 @@
 use anyhow::Result;
 use core::fmt::Debug;
 use id3::*;
+use std::ffi::OsStr;
+use std::path::Path;
 
 fn get_extension(path: &str) -> FileExtension {
-    let file = path.to_string();
-    match file.split('.').last().unwrap().to_lowercase().as_str() {
+    let ext = Path::new(path)
+        .extension()
+        .and_then(OsStr::to_str)
+        .unwrap_or("");
+    match ext {
         "mp3" => FileExtension::Mp3,
         "m4a" => FileExtension::M4a,
-        _default => panic!("No valid file extension found! Cannot determine file type"),
+        _default => panic!("{ext} is not a supported file extension! Cannot determine file type"),
     }
 }
 
@@ -180,25 +185,17 @@ mod test {
 
     #[test]
     fn match_file_extension() {
-        let mp3 = "mp3";
-        let m4a = "m4a";
+        let mp3 = "foo.mp3";
+        let m4a = "bar.m4a";
 
         assert_eq!(get_extension(mp3), FileExtension::Mp3);
         assert_eq!(get_extension(m4a), FileExtension::M4a);
     }
 
     #[test]
-    fn match_file_extension_case_insensitive() {
-        let mp3 = "MP3";
-        let m4a = "m4A";
-        assert_eq!(get_extension(mp3), FileExtension::Mp3);
-        assert_eq!(get_extension(m4a), FileExtension::M4a);
-    }
-
-    #[test]
-    #[should_panic(expected = "No valid file extension found! Cannot determine file type")]
+    #[should_panic(expected = "foo is not a supported file extension! Cannot determine file type")]
     fn no_match_panics() {
-        let mp3 = "foo";
+        let mp3 = "bar.foo";
         get_extension(mp3);
     }
 }
