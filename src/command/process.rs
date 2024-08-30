@@ -1,9 +1,9 @@
 use crate::cli::Args;
 use crate::command::write::WriteCommands;
-use std::collections::HashMap;
-use crate::tags::{get_audiofile, TagUtils};
 use crate::config::Config;
+use crate::tags::{get_audiofile, TagUtils};
 use anyhow::Result;
+use std::collections::HashMap;
 
 pub fn process(cfg: Option<Config>, args: &Args) -> Result<()> {
     let mut cmd_list: HashMap<WriteCommands, String> = HashMap::new();
@@ -29,7 +29,7 @@ pub fn process(cfg: Option<Config>, args: &Args) -> Result<()> {
         }
     }
 
-     /*
+    /*
      * Load arguments passed by the user
      * These will always take precedent over any values
      * loaded from the config.toml
@@ -55,11 +55,7 @@ pub fn process(cfg: Option<Config>, args: &Args) -> Result<()> {
 
     let audiotagbox = get_audiofile(args.file().clone(), clean_tag);
 
-    execute_write_cmds(
-        cmd_list,
-        audiotagbox
-    )?
-    .write_to_file()?;
+    execute_write_cmds(cmd_list, audiotagbox)?.write_to_file()?;
     Ok(())
 }
 
@@ -76,4 +72,3 @@ fn execute_write_cmds(
     }
     Ok(audiotagbox)
 }
-

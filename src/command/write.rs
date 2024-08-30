@@ -39,9 +39,18 @@ pub mod test {
         let title = "title";
         let year = "year";
 
-        assert_eq!(WriteCommands::get_write_command(artist).unwrap(), WriteCommands::Artist);
-        assert_eq!(WriteCommands::get_write_command(title).unwrap(), WriteCommands::Title);
-        assert_eq!(WriteCommands::get_write_command(year).unwrap(), WriteCommands::Year);
+        assert_eq!(
+            WriteCommands::get_write_command(artist).unwrap(),
+            WriteCommands::Artist
+        );
+        assert_eq!(
+            WriteCommands::get_write_command(title).unwrap(),
+            WriteCommands::Title
+        );
+        assert_eq!(
+            WriteCommands::get_write_command(year).unwrap(),
+            WriteCommands::Year
+        );
     }
 
     #[test]
@@ -50,9 +59,18 @@ pub mod test {
         let title = "tiTle";
         let year = "yeAr";
 
-        assert_eq!(WriteCommands::get_write_command(artist).unwrap(), WriteCommands::Artist);
-        assert_eq!(WriteCommands::get_write_command(title).unwrap(), WriteCommands::Title);
-        assert_eq!(WriteCommands::get_write_command(year).unwrap(), WriteCommands::Year);
+        assert_eq!(
+            WriteCommands::get_write_command(artist).unwrap(),
+            WriteCommands::Artist
+        );
+        assert_eq!(
+            WriteCommands::get_write_command(title).unwrap(),
+            WriteCommands::Title
+        );
+        assert_eq!(
+            WriteCommands::get_write_command(year).unwrap(),
+            WriteCommands::Year
+        );
     }
 
     #[test]

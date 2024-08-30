@@ -1,9 +1,9 @@
 use anyhow::Result;
 use core::fmt::Debug;
 use id3::*;
+use mp4ameta::AudioInfo;
 use std::ffi::OsStr;
 use std::path::Path;
-use mp4ameta::AudioInfo;
 fn get_extension(path: &str) -> FileExtension {
     let ext = Path::new(path)
         .extension()
@@ -67,7 +67,6 @@ pub trait TagUtils {
 
     fn set_title(&mut self, title: String);
     fn write_to_file(&self) -> Result<()>;
-    fn clear(&mut self) -> Result<()>;
 }
 
 impl Debug for dyn TagUtils {
@@ -139,11 +138,6 @@ impl TagUtils for M4aTag {
         let _ = &self.tag.write_to_path(&self.path)?;
         Ok(())
     }
-
-    fn clear(&mut self) -> Result<()> {
-        let _ = self.tag.clear();
-        Ok(())
-    }
 }
 
 /// Struct encapsulating id3::Tag interface
@@ -156,11 +150,10 @@ pub struct Id3Tag {
 }
 
 impl Tag for Id3Tag {
-
     fn new(file: String) -> Self {
-        Id3Tag { 
+        Id3Tag {
             tag: id3::Tag::new(),
-            path: file
+            path: file,
         }
     }
 
@@ -201,10 +194,6 @@ impl TagUtils for Id3Tag {
     fn write_to_file(&self) -> Result<()> {
         let _ = &self.tag.write_to_path(&self.path, Version::Id3v24)?;
         Ok(())
-    }
-
-    fn clear(&mut self) -> Result<()> {
-        panic!("--clear is not implemented for id3 tag types (mp3, wav, etc...)");
     }
 }
 
