@@ -1,12 +1,12 @@
 pub mod cli;
-pub mod tags;
 pub mod command;
 pub mod config;
+pub mod tags;
 use anyhow::Result;
 use cli::{Args, Parser};
-use simple_logger::SimpleLogger;
 use command::process::process;
 use config::get_config;
+use simple_logger::SimpleLogger;
 
 fn main() -> Result<()> {
     SimpleLogger::new()
