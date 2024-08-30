@@ -12,4 +12,4 @@ mp4ameta = "0.11.0"
 serde = { version = "1.0.205", features = ["derive"] }
 simple_logger = "5.0.0"
 toml = "0.8.19"
-
+dirs = "5.0.1"

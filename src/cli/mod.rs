@@ -24,6 +24,9 @@ pub struct Args {
     /// This is defined in the utilities config.toml
     #[arg(long)]
     profile: Option<String>,
+
+    #[arg(long)]
+    clear: bool,
 }
 
 impl Args {
@@ -45,5 +48,9 @@ impl Args {
 
     pub fn profile(&self) -> &Option<String> {
         &self.profile
+    }
+
+    pub fn clear(&self) -> &bool {
+        &self.clear
     }
 }
