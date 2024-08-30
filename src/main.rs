@@ -24,7 +24,6 @@ fn main() -> Result<()> {
 }
 
 fn execute(cfg: Option<Config>, args: &Args) -> Result<()> {
-    let mut preproc_cmd_list: Vec<PreProcessCommands> = vec![];
     let mut cmd_list: HashMap<WriteCommands, String> = HashMap::new();
 
     // Check and see if the user specified a profile to load
@@ -37,8 +36,6 @@ fn execute(cfg: Option<Config>, args: &Args) -> Result<()> {
                 for (k, v) in profile.as_table().unwrap().into_iter() {
                     if let Some(key) = WriteCommands::get_write_command(k.to_string().as_str()) {
                         cmd_list.insert(key, v.to_string());
-                    } else if let Some(pre_key) = PreProcessCommands::get_preprocess_command(k.to_string().as_str()) {
-                        preproc_cmd_list.push(pre_key);
                     } else {
                         log::warn!("Command {k} from profile {profile} is not a valid command. Skipping...");
                     }
@@ -49,12 +46,8 @@ fn execute(cfg: Option<Config>, args: &Args) -> Result<()> {
             }
         }
     }
-  
-    if *args.clear() && !preproc_cmd_list.contains(&PreProcessCommands::Clear)  {
-            preproc_cmd_list.push(PreProcessCommands::Clear);
-    }
-  
-    /*
+
+     /*
      * Load arguments passed by the user
      * These will always take precedent over any values
      * loaded from the config.toml
@@ -71,26 +64,14 @@ fn execute(cfg: Option<Config>, args: &Args) -> Result<()> {
         cmd_list.insert(WriteCommands::Artist, artist.to_string());
     }
 
-    let init_audiotagbox = get_audiofile(args.file().clone());
+    let audiotagbox = get_audiofile(args.file().clone(), *args.clear());
 
     execute_write_cmds(
         cmd_list,
-        execute_preproc_cmds(preproc_cmd_list, init_audiotagbox)?
+        audiotagbox
     )?
     .write_to_file()?;
     Ok(())
-}
-
-fn execute_preproc_cmds(
-    cmds: Vec<PreProcessCommands>,
-    mut audiotagbox: Box<dyn TagUtils>,
-) -> Result<Box<dyn TagUtils>> {
-    for k in cmds {
-        match k {
-            PreProcessCommands::Clear => audiotagbox.clear()?,
-        }
-    }
-    Ok(audiotagbox)
 }
 
 fn execute_write_cmds(
@@ -120,22 +101,6 @@ fn get_config() -> Option<Config> {
         }
     }
     None
-}
-
-/// Commands that should always be executed before WriteCommands
-#[derive(Eq, Hash, PartialEq)]
-enum PreProcessCommands {
-    /// Clear all metadata from existing tag
-    Clear,
-}
-
-impl PreProcessCommands {
-    fn get_preprocess_command(cmd: &str) -> Option<Self> {
-        match cmd.to_lowercase().as_str() {
-            "clear" => Some(Self::Clear),
-            _default => None,
-        }
-    }
 }
 
 #[derive(Eq, Hash, PartialEq, Debug)]

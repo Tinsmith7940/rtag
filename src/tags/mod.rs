@@ -3,7 +3,7 @@ use core::fmt::Debug;
 use id3::*;
 use std::ffi::OsStr;
 use std::path::Path;
-
+use mp4ameta::AudioInfo;
 fn get_extension(path: &str) -> FileExtension {
     let ext = Path::new(path)
         .extension()
@@ -27,16 +27,28 @@ pub enum FileExtension {
 
 /// Parse the target file and build the correct
 /// AudioFile enum value based on filetype
-pub fn get_audiofile(path: String) -> Box<dyn TagUtils> {
+pub fn get_audiofile(path: String, clean_tag: bool) -> Box<dyn TagUtils> {
     let audio_type = get_extension(path.as_str());
     match audio_type {
         FileExtension::Mp3 => {
             log::info!("parsing mp3 file");
-            Box::new(Id3Tag::create_tag_from_path(path))
+            let tag;
+            if clean_tag {
+                tag = Id3Tag::new(path);
+            } else {
+                tag = Id3Tag::create_tag_from_path(path);
+            }
+            Box::new(tag)
         }
         FileExtension::M4a => {
             log::info!("parsing m4a file");
-            Box::new(M4aTag::create_tag_from_path(path))
+            let tag;
+            if clean_tag {
+                tag = M4aTag::new(path);
+            } else {
+                tag = M4aTag::create_tag_from_path(path);
+            }
+            Box::new(tag)
         }
     }
 }
@@ -66,6 +78,7 @@ impl Debug for dyn TagUtils {
 
 /// Trait defining entrypoint for all Tag initialization
 pub trait Tag {
+    fn new(file: String) -> Self;
     fn create_tag_from_path(file: String) -> Self;
 }
 
@@ -79,6 +92,14 @@ pub struct M4aTag {
 }
 
 impl Tag for M4aTag {
+    /// Create a new, empty, tag
+    fn new(file: String) -> Self {
+        let audio_info = AudioInfo::default();
+        let tag = mp4ameta::Tag::new("".to_string(), audio_info, vec![]);
+
+        M4aTag { tag, path: file }
+    }
+    /// Create a new tag, with existing atoms populated from target file
     fn create_tag_from_path(file: String) -> Self {
         match mp4ameta::Tag::read_from_path(file.clone()) {
             Ok(tag) => M4aTag { tag, path: file },
@@ -135,6 +156,14 @@ pub struct Id3Tag {
 }
 
 impl Tag for Id3Tag {
+
+    fn new(file: String) -> Self {
+        Id3Tag { 
+            tag: id3::Tag::new(),
+            path: file
+        }
+    }
+
     fn create_tag_from_path(file: String) -> Self {
         match id3::Tag::read_from_path(file.clone()) {
             Ok(tag) => Id3Tag { tag, path: file },
