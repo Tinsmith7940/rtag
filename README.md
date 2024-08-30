@@ -6,12 +6,12 @@ A simple utility for adding metadata to mp4a and mp3 audio files.
 ## Basic Functionlity
 The existing functionality may be expanded in the future, but for now the feature list is:
 - Support for both mp4a and mp3 files, with ability to automatically determine file type and process accordingly.
-  - In theory any file time that uses the [id3](https://id3.org/Home) standard format will work (wav, aiff, etc), but they have not been tested.
+  - In theory any file time that uses the [id3](https://id3.org/Home) standard format may work (wav, aiff, etc) if file extensions are added to the existing list, but they have not been tested.
 - Support for writing a few basic tags (basically ones I have a regular use for). This list may grow:
   - title
   - artist
   - year
-- Suport for clearing all tags off of existing files.
+- Support for clearing all tags off of existing files.
 - Ability to define defaults and common combinations of metadata in `profile` inside a config file
 
 ## Configuration
