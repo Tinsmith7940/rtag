@@ -27,7 +27,7 @@ efficiently write tags. Example config below:
 # To set false, simply remove from toml file
 clear = true
 
-# Define a profile will common combination of metadata
+# Define a profile with common combinations of metadata
 [profile.2024]
 year = 2024
 
