@@ -63,7 +63,8 @@ fn execute(cfg: Option<Config>, args: &Args) -> Result<()> {
     if let Some(artist) = args.artist() {
         cmd_list.insert(WriteCommands::Artist, artist.to_string());
     }
-
+    
+    // TODO: handle clear flag from both cmd line AND config.toml
     let audiotagbox = get_audiofile(args.file().clone(), *args.clear());
 
     execute_write_cmds(
