@@ -14,11 +14,17 @@ The existing functionality may be expanded in the future, but for now the featur
 - Support for clearing all tags off of existing files.
 - Ability to define defaults and common combinations of metadata in `profile` inside a config file
 
+## To Execute
+- Clone repository
+- Execute `cargo build -r`
+- Put the binary into your path
+- `rtag --help`
+
 ## Configuration
-To save typing lots of things all the time, defaults can be defined in a central config file. Utility also supports defining common combinations of metadata into profiles that can be referenced from the command line to more
+To save typing lots of things all the time, defaults can be defined in a central config file. The utility also supports defining common combinations of metadata into profiles that can be referenced from the command line to more
 efficiently write tags. Example config below:
 
-`$HOME/.config/audiotag-ci/config.toml`
+`$HOME/.config/rtag/config.toml`
 ```toml
 
 # When 'clear' is set, the utility will default to clearing all existing metadata before writing new

@@ -1,5 +1,5 @@
 [package]
-name = "audiotag-ci"
+name = "rtag"
 version = "0.1.0"
 edition = "2021"
 

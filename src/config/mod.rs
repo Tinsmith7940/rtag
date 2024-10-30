@@ -12,7 +12,7 @@ pub struct Config {
 
 pub fn get_config() -> Option<Config> {
     if let Some(local_config) = config_local_dir() {
-        let path = local_config.to_str().unwrap().to_owned() + "/audiotag-ci/config.toml";
+        let path = local_config.to_str().unwrap().to_owned() + "/rtag/config.toml";
         if let Ok(file_contents) = fs::read_to_string(path) {
             match toml::from_str(&file_contents) {
                 Ok(cnf) => {
