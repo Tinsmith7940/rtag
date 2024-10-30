@@ -1,4 +1,4 @@
-# audiotag-ci
+# rtag
 A simple utility for adding metadata to mp4a and mp3 audio files.
 
 ---
